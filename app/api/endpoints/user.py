@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.database.dependencies import dbDependency
-from app.schemas.user import UserCreateSchema, UserSchema
+from app.schemas.user import UserCreateSchema, UserSchema, UserQuerySchema
 from app.crud.user import user_crud
 from app.utils import generate_password_hash
 
@@ -31,6 +31,6 @@ async def get_user(id: int, db: dbDependency):
 
 
 @user_router.post("/chat")
-def chat(query: str):
-    print(query)
-    return {"response": "Reply from AI"}
+def chat(query: UserQuerySchema):
+    print(query.question)
+    return {"response": f"Reply from AI for {query.question}"}

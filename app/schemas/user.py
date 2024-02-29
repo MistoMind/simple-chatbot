@@ -15,3 +15,10 @@ class UserSchema(UserCreateSchema):
 
     class Config:
         from_attributes = True
+
+
+class UserQuerySchema(BaseModel):
+    question: str
+
+    class Config:
+        from_attributes = True
