@@ -1,7 +1,6 @@
 from fastapi import Depends
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.memory import ChatMessageHistory
 from typing import Annotated
 
 from config import settings
@@ -22,16 +21,10 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 chain = prompt | chat
-chat_history = ChatMessageHistory()
 
 
 def get_chain():
     return chain
 
 
-def get_history():
-    return chat_history
-
-
 ChainDep = Annotated[ChatOpenAI | ChatPromptTemplate, Depends(get_chain)]
-HistoryDep = Annotated[ChatMessageHistory, Depends(get_history)]

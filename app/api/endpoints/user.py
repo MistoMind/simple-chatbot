@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
+from langchain.memory import PostgresChatMessageHistory
 from openai import RateLimitError
 
-from api.dependencies.chatbot import ChainDep, HistoryDep
+from config import settings
+from api.dependencies.chatbot import ChainDep
 from api.dependencies.core import dbDependency
 from schemas.user import UserCreateSchema, UserSchema, UserQuerySchema
 from crud.user import user_crud
@@ -33,9 +35,13 @@ async def get_user(id: int, db: dbDependency):
 
 
 @user_router.post("/chat")
-async def chat_with_ai(
-    query: UserQuerySchema, chain: ChainDep, chat_history: HistoryDep
-):
+async def chat_with_ai(query: UserQuerySchema, chain: ChainDep):
+    chat_history = PostgresChatMessageHistory(
+        session_id=str(query.user_id),
+        connection_string=settings.database_url,
+        table_name=settings.chat_history_table,
+    )
+
     chat_history.add_user_message(query.question)
 
     try:

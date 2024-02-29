@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     database_url: str
     openai_api_key: str
+    chat_history_table: str = "chat_history"
 
 
 settings = Settings()

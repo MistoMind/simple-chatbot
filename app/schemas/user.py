@@ -18,6 +18,7 @@ class UserSchema(UserCreateSchema):
 
 
 class UserQuerySchema(BaseModel):
+    user_id: int
     question: str
 
     class Config:
