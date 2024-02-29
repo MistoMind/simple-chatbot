@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
+from openai import RateLimitError
 
-from app.database.dependencies import dbDependency
-from app.schemas.user import UserCreateSchema, UserSchema, UserQuerySchema
-from app.crud.user import user_crud
-from app.utils import generate_password_hash
+from api.dependencies.chatbot import ChainDep, HistoryDep
+from api.dependencies.core import dbDependency
+from schemas.user import UserCreateSchema, UserSchema, UserQuerySchema
+from crud.user import user_crud
+from utils import generate_password_hash
 
 user_router = APIRouter(prefix="/user")
 
@@ -31,6 +33,19 @@ async def get_user(id: int, db: dbDependency):
 
 
 @user_router.post("/chat")
-def chat(query: UserQuerySchema):
-    print(query.question)
-    return {"response": f"Reply from AI for {query.question}"}
+async def chat_with_ai(
+    query: UserQuerySchema, chain: ChainDep, chat_history: HistoryDep
+):
+    chat_history.add_user_message(query.question)
+
+    try:
+        ai_response = chain.invoke({"messages": chat_history.messages})
+    except RateLimitError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Rate limit exceeded.",
+        )
+
+    chat_history.add_ai_message(ai_response.content)
+
+    return {"response": ai_response.content}
