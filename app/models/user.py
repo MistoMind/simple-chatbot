@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from database import Base
 
@@ -10,4 +10,3 @@ class UserModel(Base):
     name: Mapped[str] = mapped_column()
     email: Mapped[str] = mapped_column()
     password: Mapped[str] = mapped_column()
-    # chat_id = relationship(back_populates="user")
