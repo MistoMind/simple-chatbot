@@ -3,6 +3,7 @@ from langchain.memory import PostgresChatMessageHistory
 from openai import RateLimitError
 
 from config import settings
+from api.dependencies.auth import UserDep
 from api.dependencies.chatbot import ChainDep
 from api.dependencies.core import dbDependency
 from schemas.user import UserCreateSchema, UserSchema, UserQuerySchema
@@ -24,9 +25,9 @@ async def register_user(user: UserCreateSchema, db: dbDependency):
     return user_crud.create(db=db, user=user)
 
 
-@user_router.get("/{id}", response_model=UserSchema)
-async def get_user(id: int, db: dbDependency):
-    user = user_crud.get_by_id(db=db, id=id)
+@user_router.get("", response_model=UserSchema)
+async def get_user(user: UserDep, db: dbDependency):
+    user = user_crud.get_by_id(db=db, id=user.id)
 
     if user is None:
         raise HTTPException(status_code=404, detail="User does not exist.")
@@ -35,9 +36,9 @@ async def get_user(id: int, db: dbDependency):
 
 
 @user_router.post("/chat")
-async def chat_with_ai(query: UserQuerySchema, chain: ChainDep):
+async def chat_with_ai(query: UserQuerySchema, user: UserDep, chain: ChainDep):
     chat_history = PostgresChatMessageHistory(
-        session_id=str(query.user_id),
+        session_id=str(user.id),
         connection_string=settings.database_url,
         table_name=settings.chat_history_table,
     )
