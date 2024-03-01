@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from typing import Annotated
 
 
 class UserCreateSchema(BaseModel):
@@ -12,6 +13,7 @@ class UserCreateSchema(BaseModel):
 
 class UserSchema(UserCreateSchema):
     id: int
+    password: Annotated[str, Field(exclude=True)]
 
     class Config:
         from_attributes = True
